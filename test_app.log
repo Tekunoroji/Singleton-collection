@@ -1,0 +1,8 @@
+[2025-02-07 20:29:54] [INFO] First log message
+[2025-02-07 20:29:54] [INFO] Second log message
+[2025-02-07 20:29:54] [INFO] This is a log message
+[2025-02-07 20:29:54] [INFO] This is an info message
+[2025-02-07 20:29:54] [ERROR] This is an error message
+[2025-02-07 20:29:54] [WARNING] This is a warning message
+[2025-02-07 20:29:54] [INFO] This is a log message
+[2025-02-07 20:29:54] [INFO] Testing timestamp

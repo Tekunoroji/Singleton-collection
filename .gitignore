@@ -1,0 +1,12 @@
+/target
+# Ignore Rust build artifacts
+target/
+
+# Ignore log files
+*.log
+
+# Ignore system files (macOS & IDEs)
+.DS_Store
+.vscode/
+.idea/
+
