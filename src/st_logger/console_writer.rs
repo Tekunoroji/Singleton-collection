@@ -1,4 +1,4 @@
-use crate::log_writer::LogWriter;
+use crate::st_logger::log_writer::LogWriter;
 use colored::*;
 
 pub struct ConsoleLogWriter;

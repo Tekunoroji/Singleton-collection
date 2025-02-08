@@ -1,4 +1,4 @@
-use crate::log_writer::LogWriter;
+use crate::st_logger::log_writer::LogWriter;
 use std::io;
 
 pub struct CompositeWriter {
@@ -16,6 +16,14 @@ impl CompositeWriter {
     /// Add a new writer to the composite.
     pub fn add_writer<W: LogWriter + Send + Sync + 'static>(&mut self, writer: W) {
         self.writers.push(Box::new(writer));
+    }
+}
+
+// Implementing the Default trait allows you to use CompositeWriter::default()
+// which simply calls CompositeWriter::new(). This removes the warning.
+impl Default for CompositeWriter {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

@@ -1,9 +1,9 @@
-[2025-02-08 01:26:29] [INFO] First log message
-[2025-02-08 01:26:29] [INFO] Second log message
-[2025-02-08 01:26:29] [INFO] This is an info message
-[2025-02-08 01:26:29] [ERROR] This is an error message
-[2025-02-08 01:26:29] [WARNING] This is a warning message
-[2025-02-08 01:26:29] [DEBUG] This is a debug message
-[2025-02-08 01:26:29] [INFO] This is a log message
-[2025-02-08 01:26:29] [INFO] This is a log message
-[2025-02-08 01:26:29] [INFO] Testing timestamp
+[2025-02-08 11:11:49] [INFO] This is a log message
+[2025-02-08 11:11:49] [INFO] This is an info message
+[2025-02-08 11:11:49] [ERROR] This is an error message
+[2025-02-08 11:11:49] [INFO] This is a log message
+[2025-02-08 11:11:49] [INFO] First log message
+[2025-02-08 11:11:49] [INFO] Second log message
+[2025-02-08 11:11:49] [WARNING] This is a warning message
+[2025-02-08 11:11:49] [DEBUG] This is a debug message
+[2025-02-08 11:11:49] [INFO] Testing timestamp
