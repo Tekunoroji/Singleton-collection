@@ -14,3 +14,26 @@
 [2025-02-07 20:30:00] [ERROR] This is an error message
 [2025-02-07 20:30:00] [WARNING] This is a warning message
 [2025-02-07 20:30:00] [DEBUG] This is a debug message
+[2025-02-07 23:22:00] [INFO] File log should not have colors
+[2025-02-07 23:25:38] [INFO] File log should not have colors
+[2025-02-07 23:27:35] [INFO] File log should not have colors
+[2025-02-07 23:30:47] [INFO] File log should not have colors
+[2025-02-07 23:40:42] [INFO] File log should not have colors
+[2025-02-07 23:40:42] [INFO] This is a test message
+[2025-02-08 00:36:04] [DEBUG] Hello, world!
+[2025-02-08 01:11:24] [DEBUG] Hello, world!
+[2025-02-08 01:11:24] [INFO] This is an info log
+[2025-02-08 01:11:24] [WARNING] This is a warning log
+[2025-02-08 01:11:24] [ERROR] This is an error log
+[2025-02-08 01:11:52] [DEBUG] Hello, world!
+[2025-02-08 01:11:52] [INFO] This is an info log
+[2025-02-08 01:11:52] [WARNING] This is a warning log
+[2025-02-08 01:11:52] [ERROR] This is an error log
+[2025-02-08 01:13:00] [DEBUG] Hello, world!
+[2025-02-08 01:13:00] [INFO] This is an info log
+[2025-02-08 01:13:00] [WARNING] This is a warning log
+[2025-02-08 01:13:00] [ERROR] This is an error log
+[2025-02-08 01:26:10] [DEBUG] Hello, world!
+[2025-02-08 01:26:10] [INFO] This is an info log
+[2025-02-08 01:26:10] [WARNING] This is a warning log
+[2025-02-08 01:26:10] [ERROR] This is an error log

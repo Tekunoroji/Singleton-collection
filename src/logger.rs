@@ -1,8 +1,10 @@
+use crate::composite_writer::CompositeWriter;
+use crate::console_writer::ConsoleLogWriter;
+use crate::file_writer::FileLogWriter;
+use crate::log_writer::LogWriter;
 use chrono::Local;
-use colored::*;
 use once_cell::sync::Lazy;
-use std::fs::OpenOptions;
-use std::io::Write;
+
 use std::sync::Mutex;
 
 #[derive(Debug)]
@@ -13,19 +15,17 @@ pub enum LogLevel {
     Error,
 }
 
-pub struct Logger {
-    pub file_path: String,
+pub struct Logger<W: LogWriter> {
+    writer: W,
 }
 
-impl Logger {
-    pub fn new(file_path: &str) -> Self {
-        Self {
-            file_path: file_path.into(),
-        }
+impl<W: LogWriter> Logger<W> {
+    pub fn new(writer: W) -> Self {
+        Self { writer }
     }
 
-    pub fn log(&mut self, level: LogLevel, message: &str) -> std::io::Result<()> {
-        let local = Local::now().format("[%Y-%m-%d %H:%M:%S]").to_string();
+    pub fn log(&self, level: LogLevel, message: &str) -> std::io::Result<()> {
+        let timestamp = Local::now().format("[%Y-%m-%d %H:%M:%S]").to_string();
 
         let raw_level = match level {
             LogLevel::Debug => "[DEBUG]",
@@ -34,40 +34,39 @@ impl Logger {
             LogLevel::Error => "[ERROR]",
         };
 
-        let colored_level = match level {
-            LogLevel::Debug => "[DEBUG]".blue(),
-            LogLevel::Info => "[INFO]".green(),
-            LogLevel::Warning => "[WARNING]".yellow(),
-            LogLevel::Error => "[ERROR]".red(),
-        };
-
-        let log_message = format!("{} {} {}", local, colored_level, message);
-        println!("{}", log_message);
-
-        let log_message = format!("{} {} {}\n", local, raw_level, message);
-        let mut file = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&self.file_path)?;
-
-        file.write_all(log_message.as_bytes())?;
+        let log_message = format!("{} {} {}", timestamp, raw_level, message);
+        self.writer.write(&log_message)?; // Injected writer handles the logging
         Ok(())
     }
 }
 
-#[cfg(test)]
-pub static LOGGER: Lazy<Mutex<Logger>> = Lazy::new(|| Mutex::new(Logger::new("test_app.log")));
-
 #[cfg(not(test))]
-pub static LOGGER: Lazy<Mutex<Logger>> = Lazy::new(|| Mutex::new(Logger::new("app.log")));
+pub static LOGGER: Lazy<Mutex<Logger<CompositeWriter>>> = Lazy::new(|| {
+    let mut composite = CompositeWriter::new();
+    composite.add_writer(ConsoleLogWriter);
+    composite.add_writer(FileLogWriter::new("app.log"));
+    Mutex::new(Logger::new(composite))
+});
 
-pub fn get_logger() -> &'static Mutex<Logger> {
+#[cfg(test)]
+pub static LOGGER: Lazy<Mutex<Logger<CompositeWriter>>> = Lazy::new(|| {
+    let mut composite = CompositeWriter::new();
+    composite.add_writer(ConsoleLogWriter);
+    composite.add_writer(FileLogWriter::new("test_app.log"));
+    Mutex::new(Logger::new(composite))
+});
+
+pub fn get_logger() -> &'static Mutex<Logger<CompositeWriter>> {
     &LOGGER
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::globaldeb;
+    use crate::globalerror;
+    use crate::globalinfo;
+    use crate::globalwarn;
+    use regex::Regex;
     use std::fs::{remove_file, File};
     use std::io::Read;
 
@@ -94,17 +93,10 @@ mod tests {
     }
 
     #[test]
-
     fn it_logs_messages_to_file() {
         reset_log_file();
-        let logger = get_logger();
-        {
-            let mut log_instance = logger.lock().unwrap();
-            match log_instance.log(LogLevel::Info, "This is a log message") {
-                Ok(_) => println!("Log message written successfully"),
-                Err(e) => println!("Error writing log message: {}", e),
-            }
-        }
+        // Instead of manually locking and calling log, use the globalinfo! macro.
+        globalinfo!("This is a log message");
 
         let log_contents = read_file();
         assert!(log_contents.contains("[INFO] This is a log message"));
@@ -113,44 +105,23 @@ mod tests {
     #[test]
     fn it_logs_different_levels_correctly() {
         reset_log_file();
-        let logger = get_logger();
-        {
-            let mut log_instance = logger.lock().unwrap();
-            match log_instance.log(LogLevel::Info, "This is an info message") {
-                Ok(_) => println!("Log message written successfully"),
-                Err(e) => println!("Error writing log message: {}", e),
-            }
-            match log_instance.log(LogLevel::Error, "This is an error message") {
-                Ok(_) => println!("Log message written successfully"),
-                Err(e) => println!("Error writing log message: {}", e),
-            }
-            match log_instance.log(LogLevel::Warning, "This is a warning message") {
-                Ok(_) => println!("Log message written successfully"),
-                Err(e) => println!("Error writing log message: {}", e),
-            }
-        }
+        globalinfo!("This is an info message");
+        globalerror!("This is an error message");
+        globalwarn!("This is a warning message");
+        globaldeb!("This is a debug message");
 
         let log_contents = read_file();
         assert!(log_contents.contains("[INFO] This is an info message"));
         assert!(log_contents.contains("[ERROR] This is an error message"));
         assert!(log_contents.contains("[WARNING] This is a warning message"));
+        assert!(log_contents.contains("[DEBUG] This is a debug message"));
     }
 
     #[test]
     fn it_appends_messages_to_file() {
         reset_log_file();
-        let logger = get_logger();
-        {
-            let mut log_instance = logger.lock().unwrap();
-            match log_instance.log(LogLevel::Info, "First log message") {
-                Ok(_) => println!("Log message written successfully"),
-                Err(e) => println!("Error writing log message: {}", e),
-            }
-            match log_instance.log(LogLevel::Info, "Second log message") {
-                Ok(_) => println!("Log message written successfully"),
-                Err(e) => println!("Error writing log message: {}", e),
-            }
-        }
+        globalinfo!("First log message");
+        globalinfo!("Second log message");
 
         let log_contents = read_file();
         assert!(log_contents.contains("[INFO] First log message"));
@@ -158,17 +129,10 @@ mod tests {
     }
 
     #[test]
-
     fn it_creates_file_if_not_exists() {
         remove_file(TEST_LOG_FILE).ok();
-        let logger = get_logger();
-        {
-            let mut log_instance = logger.lock().unwrap();
-            match log_instance.log(LogLevel::Info, "This is a log message") {
-                Ok(_) => println!("Log message written successfully"),
-                Err(e) => println!("Error writing log message: {}", e),
-            }
-        }
+        globalinfo!("This is a log message");
+
         let log_contents = read_file();
         assert!(log_contents.contains("[INFO] This is a log message"));
     }
@@ -176,20 +140,12 @@ mod tests {
     #[test]
     fn it_logs_with_correct_timestamp_format() {
         reset_log_file();
-        let logger = get_logger();
-        {
-            let mut log_instance = logger.lock().unwrap();
-            match log_instance.log(LogLevel::Info, "Testing timestamp") {
-                Ok(_) => println!("Log message written successfully"),
-                Err(e) => println!("Error writing log message: {}", e),
-            };
-        }
+        globalinfo!("Testing timestamp");
 
         let log_contents = read_file();
         let timestamp = extract_first_timestamp(&log_contents).expect("No timestamp found");
 
-        let timestamp_pattern =
-            regex::Regex::new(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$").unwrap();
+        let timestamp_pattern = Regex::new(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$").unwrap();
         assert!(
             timestamp_pattern.is_match(&timestamp),
             "Timestamp format is incorrect: {}",
