@@ -4,7 +4,7 @@ use crate::st_logger::file_writer::FileLogWriter;
 use crate::st_logger::log_writer::LogWriter;
 use chrono::Local;
 use once_cell::sync::Lazy;
-
+use std::io::{Error, ErrorKind};
 use std::sync::Mutex;
 
 #[derive(Debug)]
@@ -35,7 +35,12 @@ impl<W: LogWriter> Logger<W> {
         };
 
         let log_message = format!("{} {} {}", timestamp, raw_level, message);
-        self.writer.write(&log_message)?; // Injected writer handles the logging
+        self.writer.write(&log_message).map_err(|err| {
+            Error::new(
+                ErrorKind::Other,
+                format!("Failed to write message {} to log: {}", log_message, err),
+            )
+        })?;
         Ok(())
     }
 }
