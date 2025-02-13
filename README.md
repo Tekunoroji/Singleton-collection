@@ -176,5 +176,3 @@ singleton_logger = { git = "https://github.com/Tekunoroji/Singleton-collection.g
 ---
 
 
-It’s a flexible foundation that can grow with your application’s needs. Enjoy building with Rust and happy logging!
-
