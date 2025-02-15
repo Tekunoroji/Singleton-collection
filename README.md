@@ -173,6 +173,9 @@ singleton_logger = { git = "https://github.com/Tekunoroji/Singleton-collection.g
 - **Additional Writers:**  
   Easily extend the logger by adding new writers (e.g., JSON, remote logging) using the dependency injection pattern.
 
+- **New Singleton Global Error Handler:**
+  Add a new global error handler. 
+
 ---
 
 
